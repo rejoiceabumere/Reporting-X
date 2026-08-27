@@ -4,189 +4,635 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>X Report Helper</title>
+    <title>X Report Package Builder</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <main class="container">
+<main class="container">
 
-        <section class="card">
+    <section class="card">
 
-            <div class="logo">𝕏</div>
+        <div class="logo">𝕏</div>
 
-            <h1>X Report Helper</h1>
+        <h1>X Report Package Builder</h1>
 
-            <p class="subtitle">
-                Prepare a report for an X account you believe violates
-                X's rules.
+        <p class="subtitle">
+            Organize genuine violation reports and their supporting evidence.
+        </p>
+
+        <!-- ACCOUNTS -->
+
+        <label for="accounts">
+            X usernames or profile links
+        </label>
+
+        <textarea
+            id="accounts"
+            placeholder="@username1
+@username2
+https://x.com/username3"
+        ></textarea>
+
+        <p class="hint">
+            Enter one account per line.
+        </p>
+
+
+        <!-- REASON -->
+
+        <label for="reason">
+            Report reason
+        </label>
+
+        <select id="reason">
+
+            <option value="">
+                Select a genuine reason
+            </option>
+
+            <option>
+                Harassment or abusive behavior
+            </option>
+
+            <option>
+                Hateful conduct
+            </option>
+
+            <option>
+                Spam or platform manipulation
+            </option>
+
+            <option>
+                Impersonation
+            </option>
+
+            <option>
+                Violent threats
+            </option>
+
+            <option>
+                Other violation
+            </option>
+
+        </select>
+
+
+        <!-- EVIDENCE -->
+
+        <label for="evidence">
+            Evidence / post links
+        </label>
+
+        <textarea
+            id="evidence"
+            placeholder="https://x.com/user/status/123456
+https://x.com/user/status/789012
+https://x.com/user/status/345678"
+        ></textarea>
+
+        <p class="hint">
+            Put one relevant post link per line.
+        </p>
+
+
+        <!-- DESCRIPTION -->
+
+        <label for="description">
+            Additional information
+        </label>
+
+        <textarea
+            id="description"
+            placeholder="Briefly explain what happened and why the evidence supports the report."
+        ></textarea>
+
+
+        <!-- GENERATE -->
+
+        <button onclick="generatePackages()">
+            Generate Report Packages
+        </button>
+
+
+        <p id="message"></p>
+
+
+        <!-- RESULTS -->
+
+        <div id="results"></div>
+
+
+        <div class="notice">
+
+            <strong>Important</strong>
+
+            <p>
+                Only report genuine violations and provide truthful
+                information. X reviews submitted reports and determines
+                whether enforcement is appropriate.
             </p>
 
-            <!-- Account -->
-            <label for="account">
-                X username or profile link
-            </label>
+        </div>
 
-            <input
-                type="text"
-                id="account"
-                placeholder="@username or https://x.com/username"
-            >
+    </section>
 
-            <!-- Reason -->
-            <label for="reason">
-                Reason for report
-            </label>
-
-            <select id="reason">
-
-                <option value="">
-                    Select a reason
-                </option>
-
-                <option value="Harassment">
-                    Harassment or abusive behavior
-                </option>
-
-                <option value="Hateful conduct">
-                    Hateful conduct
-                </option>
-
-                <option value="Spam">
-                    Spam or platform manipulation
-                </option>
-
-                <option value="Impersonation">
-                    Impersonation
-                </option>
-
-                <option value="Violent threats">
-                    Violent threats
-                </option>
-
-                <option value="Other">
-                    Other violation
-                </option>
-
-            </select>
-
-            <!-- Evidence -->
-            <label for="evidence">
-                Evidence / post link
-            </label>
-
-            <textarea
-                id="evidence"
-                placeholder="Paste a link to the post or add useful information..."
-            ></textarea>
-
-            <!-- Message -->
-            <p id="message"></p>
-
-            <!-- Button -->
-            <button onclick="prepareReport()">
-                Continue to X Reporting
-            </button>
-
-            <div class="notice">
-
-                <strong>Important</strong>
-
-                <p>
-                    Only submit reports for genuine violations.
-                    X reviews reports and decides whether enforcement
-                    is appropriate.
-                </p>
-
-            </div>
-
-        </section>
-
-    </main>
+</main>
 
 
-    <script>
+<script>
 
-        function prepareReport() {
+/* -----------------------------
+   CLEAN USERNAME
+----------------------------- */
 
-            const account =
-                document.getElementById("account").value.trim();
+function cleanUsername(value) {
 
-            const reason =
-                document.getElementById("reason").value;
+    value = value.trim();
 
-            const evidence =
-                document.getElementById("evidence").value.trim();
+    if (!value) {
+        return null;
+    }
 
-            const message =
-                document.getElementById("message");
-
-
-            // Check account
-            if (account === "") {
-
-                message.textContent =
-                    "Please enter an X username or profile link.";
-
-                return;
-            }
+    value = value.replace(/\s+/g, "");
 
 
-            // Check reason
-            if (reason === "") {
+    /* X profile URL */
 
-                message.textContent =
-                    "Please select a reason for the report.";
+    if (
+        value.includes("x.com/") ||
+        value.includes("twitter.com/")
+    ) {
 
-                return;
-            }
+        try {
 
-
-            // Save report information locally
-            const report = {
-
-                account: account,
-
-                reason: reason,
-
-                evidence: evidence,
-
-                date: new Date().toLocaleString()
-
-            };
-
-
-            let reports =
-                JSON.parse(localStorage.getItem("xReports")) || [];
-
-            reports.push(report);
-
-            localStorage.setItem(
-                "xReports",
-                JSON.stringify(reports)
+            const url = new URL(
+                value.startsWith("http")
+                    ? value
+                    : "https://" + value
             );
 
+            const parts =
+                url.pathname
+                    .split("/")
+                    .filter(Boolean);
 
-            // Tell the user
-            message.textContent =
-                "Your report information has been prepared. Opening X's official reporting guidance...";
+            if (parts.length > 0) {
 
+                const username =
+                    parts[0].replace("@", "");
 
-            // Open official X reporting page
-            setTimeout(function() {
+                if (
+                    /^[A-Za-z0-9_]{1,15}$/.test(username)
+                ) {
 
-                window.open(
-                    "https://help.x.com/en/safety-and-security/report-abusive-behavior",
-                    "_blank"
-                );
+                    return "@" + username;
 
-            }, 800);
+                }
+
+            }
+
+        } catch {
+
+            return null;
 
         }
 
-    </script>
+    }
+
+
+    /* Plain username */
+
+    value = value.replace("@", "");
+
+    if (
+        /^[A-Za-z0-9_]{1,15}$/.test(value)
+    ) {
+
+        return "@" + value;
+
+    }
+
+    return null;
+}
+
+
+/* -----------------------------
+   ESCAPE HTML
+----------------------------- */
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* -----------------------------
+   GENERATE PACKAGES
+----------------------------- */
+
+function generatePackages() {
+
+    const accountsText =
+        document.getElementById("accounts").value;
+
+    const reason =
+        document.getElementById("reason").value;
+
+    const evidenceText =
+        document.getElementById("evidence").value;
+
+    const description =
+        document.getElementById("description").value.trim();
+
+    const message =
+        document.getElementById("message");
+
+    const results =
+        document.getElementById("results");
+
+
+    results.innerHTML = "";
+    message.textContent = "";
+
+
+    /* Validate accounts */
+
+    if (!accountsText.trim()) {
+
+        message.textContent =
+            "Please enter at least one account.";
+
+        return;
+    }
+
+
+    /* Validate reason */
+
+    if (!reason) {
+
+        message.textContent =
+            "Please select a report reason.";
+
+        return;
+    }
+
+
+    /* Convert accounts to array */
+
+    const lines =
+        accountsText.split("\n");
+
+    const accounts = [];
+
+    lines.forEach(function(line) {
+
+        const username =
+            cleanUsername(line);
+
+        if (
+            username &&
+            !accounts.includes(username)
+        ) {
+
+            accounts.push(username);
+
+        }
+
+    });
+
+
+    if (accounts.length === 0) {
+
+        message.textContent =
+            "No valid X usernames were found.";
+
+        return;
+    }
+
+
+    /* Evidence */
+
+    const evidence =
+        evidenceText
+            .split("\n")
+            .map(link => link.trim())
+            .filter(link => link !== "");
+
+
+    message.textContent =
+        accounts.length +
+        " individual report package(s) created.";
+
+
+    /* Create each package */
+
+    accounts.forEach(function(username, index) {
+
+        createPackage(
+            username,
+            reason,
+            evidence,
+            description,
+            index
+        );
+
+    });
+
+}
+
+
+/* -----------------------------
+   CREATE PACKAGE
+----------------------------- */
+
+function createPackage(
+    username,
+    reason,
+    evidence,
+    description,
+    index
+) {
+
+    const results =
+        document.getElementById("results");
+
+
+    const box =
+        document.createElement("div");
+
+    box.className =
+        "report-box";
+
+
+    const profileUrl =
+        "https://x.com/" +
+        username.substring(1);
+
+
+    let evidenceHTML = "";
+
+
+    if (evidence.length > 0) {
+
+        evidenceHTML =
+            "<ul>";
+
+        evidence.forEach(function(link) {
+
+            evidenceHTML +=
+                "<li>" +
+                escapeHTML(link) +
+                "</li>";
+
+        });
+
+        evidenceHTML +=
+            "</ul>";
+
+    } else {
+
+        evidenceHTML =
+            "<p class='empty'>No evidence links provided.</p>";
+
+    }
+
+
+    box.innerHTML = `
+
+        <div class="package-header">
+
+            <h3>
+                Report Package ${index + 1}
+            </h3>
+
+            <span>
+                ${escapeHTML(username)}
+            </span>
+
+        </div>
+
+
+        <div class="details">
+
+            <p>
+                <strong>Account:</strong>
+                ${escapeHTML(username)}
+            </p>
+
+            <p>
+                <strong>Profile:</strong><br>
+
+                <a
+                    href="${profileUrl}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    ${profileUrl}
+                </a>
+
+            </p>
+
+            <p>
+                <strong>Reason:</strong>
+                ${escapeHTML(reason)}
+            </p>
+
+
+            <p>
+                <strong>Evidence:</strong>
+            </p>
+
+            ${evidenceHTML}
+
+
+            <p>
+                <strong>Additional information:</strong>
+            </p>
+
+            <p class="description">
+
+                ${
+                    description
+                        ? escapeHTML(description)
+                        : "No additional information provided."
+                }
+
+            </p>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                class="download"
+                onclick="downloadPackage(
+                    '${escapeJS(username)}',
+                    '${escapeJS(reason)}',
+                    ${JSON.stringify(evidence)},
+                    '${escapeJS(description)}'
+                )"
+            >
+                Download Package
+            </button>
+
+
+            <button
+                class="open"
+                onclick="openXProfile('${escapeJS(profileUrl)}')"
+            >
+                Open X Profile
+            </button>
+
+        </div>
+
+    `;
+
+
+    results.appendChild(box);
+
+}
+
+
+/* -----------------------------
+   DOWNLOAD REPORT
+----------------------------- */
+
+function downloadPackage(
+    username,
+    reason,
+    evidence,
+    description
+) {
+
+    let text = "";
+
+    text += "X REPORT PACKAGE\n";
+    text += "========================\n\n";
+
+    text += "ACCOUNT\n";
+    text += username + "\n\n";
+
+    text += "PROFILE\n";
+    text += "https://x.com/" +
+            username.substring(1) +
+            "\n\n";
+
+    text += "REASON\n";
+    text += reason + "\n\n";
+
+    text += "EVIDENCE\n";
+
+    if (evidence.length > 0) {
+
+        evidence.forEach(function(link, index) {
+
+            text +=
+                (index + 1) +
+                ". " +
+                link +
+                "\n";
+
+        });
+
+    } else {
+
+        text +=
+            "No evidence links provided.\n";
+
+    }
+
+
+    text += "\nADDITIONAL INFORMATION\n";
+
+    text +=
+        description ||
+        "No additional information provided.";
+
+
+    text +=
+        "\n\n------------------------\n";
+
+    text +=
+        "Prepared for review and submission through X's official reporting process.\n";
+
+
+    const blob =
+        new Blob(
+            [text],
+            {
+                type: "text/plain"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+
+    link.download =
+        username.substring(1) +
+        "-report-package.txt";
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* -----------------------------
+   OPEN X PROFILE
+----------------------------- */
+
+function openXProfile(url) {
+
+    window.open(
+        url,
+        "_blank",
+        "noopener"
+    );
+
+}
+
+
+/* -----------------------------
+   ESCAPE JAVASCRIPT STRINGS
+----------------------------- */
+
+function escapeJS(text) {
+
+    return String(text)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, "\\n")
+        .replace(/\r/g, "\\r");
+
+}
+
+</script>
 
 </body>
 </html>
