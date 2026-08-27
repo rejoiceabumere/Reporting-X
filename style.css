@@ -6,9 +6,18 @@
 
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
 
-    background: #f2f2f2;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f3f3f3,
+            #e7e7e7
+        );
 
     min-height: 100vh;
 
@@ -17,15 +26,17 @@ body {
 
 
 .container {
+
     width: 100%;
 
-    max-width: 600px;
+    max-width: 700px;
 
     margin: auto;
 }
 
 
 .card {
+
     background: white;
 
     padding: 35px;
@@ -33,22 +44,25 @@ body {
     border-radius: 22px;
 
     box-shadow:
-        0 10px 35px rgba(0, 0, 0, 0.10);
+        0 12px 40px
+        rgba(0, 0, 0, 0.10);
 }
 
 
 /* LOGO */
 
 .logo {
-    width: 60px;
-    height: 60px;
 
-    margin: 0 auto 18px;
+    width: 62px;
+    height: 62px;
+
+    margin:
+        0 auto 18px;
 
     display: flex;
 
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
     background: black;
 
@@ -56,7 +70,7 @@ body {
 
     border-radius: 50%;
 
-    font-size: 30px;
+    font-size: 31px;
 
     font-weight: bold;
 }
@@ -65,6 +79,7 @@ body {
 /* TITLE */
 
 h1 {
+
     text-align: center;
 
     font-size: 28px;
@@ -74,6 +89,7 @@ h1 {
 
 
 .subtitle {
+
     text-align: center;
 
     color: #666;
@@ -87,64 +103,71 @@ h1 {
 /* LABEL */
 
 label {
+
     display: block;
+
+    font-size: 15px;
 
     font-weight: bold;
 
-    font-size: 15px;
-
     margin-bottom: 8px;
-
-    margin-top: 20px;
 }
 
 
-/* INPUTS */
-
-input,
-textarea,
-select {
-
-    width: 100%;
-
-    padding: 14px;
-
-    border: 1px solid #ccc;
-
-    border-radius: 12px;
-
-    background: white;
-
-    font-family: inherit;
-
-    font-size: 15px;
-}
-
+/* TEXTAREA */
 
 textarea {
 
-    min-height: 120px;
+    width: 100%;
+
+    min-height: 190px;
+
+    padding: 15px;
+
+    border:
+        1px solid #ccc;
+
+    border-radius: 13px;
 
     resize: vertical;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    line-height: 1.5;
 }
 
 
-input:focus,
-textarea:focus,
-select:focus {
+textarea:focus {
 
     outline: none;
 
-    border-color: #000;
+    border-color: #111;
 
     box-shadow:
-        0 0 0 3px rgba(0, 0, 0, 0.07);
+        0 0 0 3px
+        rgba(0, 0, 0, 0.07);
 }
 
 
-/* BUTTON */
+/* HINT */
 
-button {
+.hint {
+
+    margin-top: 7px;
+
+    color: #777;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* MAIN BUTTON */
+
+.card > button {
 
     width: 100%;
 
@@ -156,7 +179,7 @@ button {
 
     border-radius: 12px;
 
-    background: #000;
+    background: black;
 
     color: white;
 
@@ -168,17 +191,9 @@ button {
 }
 
 
-button:hover {
+.card > button:hover {
 
     background: #222;
-}
-
-
-/* HIDDEN */
-
-.hidden {
-
-    display: none;
 }
 
 
@@ -190,97 +205,116 @@ button:hover {
 
     margin-top: 15px;
 
-    color: #b00020;
+    color: #555;
 
     font-size: 14px;
 }
 
 
-/* ACCOUNT PREVIEW */
-
-.account-preview {
-
-    margin-top: 25px;
-
-    padding: 15px;
-
-    border-radius: 12px;
-
-    background: #f3f3f3;
-}
-
-
-.account-preview span {
-
-    display: block;
-
-    color: #777;
-
-    font-size: 13px;
-
-    margin-bottom: 5px;
-}
-
-
-.account-preview strong {
-
-    font-size: 18px;
-}
-
-
-/* REPORT */
+/* REPORT BOX */
 
 .report-box {
 
-    margin-top: 25px;
+    margin-top: 22px;
 
     padding: 20px;
 
-    border-radius: 15px;
-
     background: #fafafa;
 
-    border: 1px solid #ddd;
+    border:
+        1px solid #ddd;
+
+    border-radius: 16px;
 }
 
 
-.report-box h2 {
+.result-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
 
     margin-bottom: 18px;
+}
+
+
+.result-header h2 {
 
     font-size: 20px;
 }
 
 
-.report-box p {
+.result-header span {
 
-    margin-bottom: 12px;
+    padding: 6px 10px;
+
+    background: #111;
+
+    color: white;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+/* SUGGESTION */
+
+.suggestion {
+
+    padding: 15px;
+
+    background: #eeeeee;
+
+    border-radius: 12px;
+
+    margin-bottom: 18px;
+}
+
+
+.suggestion strong {
+
+    display: block;
+
+    font-size: 17px;
+
+    margin-bottom: 5px;
+}
+
+
+.suggestion p {
+
+    color: #666;
+
+    font-size: 13px;
+}
+
+
+/* INFORMATION */
+
+.information p {
+
+    margin-top: 12px;
+
+    margin-bottom: 7px;
 
     line-height: 1.5;
 }
 
 
-.report-box a {
+.information a {
 
     color: #0969da;
 
     word-break: break-all;
-}
 
-
-.report-box ul {
-
-    padding-left: 20px;
-
-    margin-bottom: 15px;
-}
-
-
-.report-box li {
-
-    margin-bottom: 8px;
-
-    word-break: break-all;
+    font-size: 14px;
 }
 
 
@@ -288,23 +322,60 @@ button:hover {
 
     color: #555;
 
-    white-space: pre-wrap;
+    line-height: 1.5;
 }
 
 
-/* SECONDARY BUTTON */
+/* BUTTONS */
 
-.secondary {
+.buttons {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+
+.buttons button {
+
+    flex: 1;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: black;
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+.buttons button:hover {
+
+    background: #222;
+}
+
+
+.buttons .profile-button {
 
     background: white;
 
     color: black;
 
-    border: 1px solid #bbb;
+    border:
+        1px solid #bbb;
 }
 
 
-.secondary:hover {
+.buttons .profile-button:hover {
 
     background: #eee;
 }
@@ -314,11 +385,17 @@ button:hover {
 
 .error {
 
-    color: #b00020;
-
     margin-top: 15px;
 
-    font-size: 14px;
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background: #fff0f0;
+
+    color: #a00000;
+
+    font-size: 13px;
 }
 
 
@@ -330,9 +407,9 @@ button:hover {
 
     padding: 16px;
 
-    border-radius: 12px;
-
     background: #f1f1f1;
+
+    border-radius: 12px;
 
     color: #555;
 
@@ -356,13 +433,6 @@ button:hover {
 
 @media (max-width: 600px) {
 
-    body {
-
-        padding: 15px 10px;
-
-    }
-
-
     .card {
 
         padding: 25px 18px;
@@ -373,6 +443,29 @@ button:hover {
     h1 {
 
         font-size: 24px;
+
+    }
+
+
+    .result-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .buttons {
+
+        flex-direction: column;
+
+    }
+
+
+    .buttons button {
+
+        width: 100%;
 
     }
 
