@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>X Report Helper</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <section class="card">
+
+            <div class="logo">𝕏</div>
+
+            <h1>X Report Helper</h1>
+
+            <p class="subtitle">
+                Prepare a report for an X account you believe violates
+                X's rules.
+            </p>
+
+            <!-- Account -->
+            <label for="account">
+                X username or profile link
+            </label>
+
+            <input
+                type="text"
+                id="account"
+                placeholder="@username or https://x.com/username"
+            >
+
+            <!-- Reason -->
+            <label for="reason">
+                Reason for report
+            </label>
+
+            <select id="reason">
+
+                <option value="">
+                    Select a reason
+                </option>
+
+                <option value="Harassment">
+                    Harassment or abusive behavior
+                </option>
+
+                <option value="Hateful conduct">
+                    Hateful conduct
+                </option>
+
+                <option value="Spam">
+                    Spam or platform manipulation
+                </option>
+
+                <option value="Impersonation">
+                    Impersonation
+                </option>
+
+                <option value="Violent threats">
+                    Violent threats
+                </option>
+
+                <option value="Other">
+                    Other violation
+                </option>
+
+            </select>
+
+            <!-- Evidence -->
+            <label for="evidence">
+                Evidence / post link
+            </label>
+
+            <textarea
+                id="evidence"
+                placeholder="Paste a link to the post or add useful information..."
+            ></textarea>
+
+            <!-- Message -->
+            <p id="message"></p>
+
+            <!-- Button -->
+            <button onclick="prepareReport()">
+                Continue to X Reporting
+            </button>
+
+            <div class="notice">
+
+                <strong>Important</strong>
+
+                <p>
+                    Only submit reports for genuine violations.
+                    X reviews reports and decides whether enforcement
+                    is appropriate.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        function prepareReport() {
+
+            const account =
+                document.getElementById("account").value.trim();
+
+            const reason =
+                document.getElementById("reason").value;
+
+            const evidence =
+                document.getElementById("evidence").value.trim();
+
+            const message =
+                document.getElementById("message");
+
+
+            // Check account
+            if (account === "") {
+
+                message.textContent =
+                    "Please enter an X username or profile link.";
+
+                return;
+            }
+
+
+            // Check reason
+            if (reason === "") {
+
+                message.textContent =
+                    "Please select a reason for the report.";
+
+                return;
+            }
+
+
+            // Save report information locally
+            const report = {
+
+                account: account,
+
+                reason: reason,
+
+                evidence: evidence,
+
+                date: new Date().toLocaleString()
+
+            };
+
+
+            let reports =
+                JSON.parse(localStorage.getItem("xReports")) || [];
+
+            reports.push(report);
+
+            localStorage.setItem(
+                "xReports",
+                JSON.stringify(reports)
+            );
+
+
+            // Tell the user
+            message.textContent =
+                "Your report information has been prepared. Opening X's official reporting guidance...";
+
+
+            // Open official X reporting page
+            setTimeout(function() {
+
+                window.open(
+                    "https://help.x.com/en/safety-and-security/report-abusive-behavior",
+                    "_blank"
+                );
+
+            }, 800);
+
+        }
+
+    </script>
+
+</body>
+</html>
