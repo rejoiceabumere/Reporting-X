@@ -19,7 +19,7 @@ body {
 .container {
     width: 100%;
 
-    max-width: 700px;
+    max-width: 600px;
 
     margin: auto;
 }
@@ -43,7 +43,7 @@ body {
     width: 60px;
     height: 60px;
 
-    margin: 0 auto 15px;
+    margin: 0 auto 18px;
 
     display: flex;
 
@@ -84,110 +84,77 @@ h1 {
 }
 
 
-/* LABELS */
+/* LABEL */
 
 label {
     display: block;
 
-    margin-top: 20px;
-
-    margin-bottom: 8px;
-
     font-weight: bold;
 
     font-size: 15px;
+
+    margin-bottom: 8px;
+
+    margin-top: 20px;
 }
 
 
 /* INPUTS */
 
+input,
 textarea,
 select {
 
     width: 100%;
 
+    padding: 14px;
+
     border: 1px solid #ccc;
 
     border-radius: 12px;
 
-    padding: 14px;
-
-    font-size: 15px;
+    background: white;
 
     font-family: inherit;
 
-    background: white;
-
+    font-size: 15px;
 }
 
 
 textarea {
 
-    min-height: 130px;
+    min-height: 120px;
 
     resize: vertical;
-
 }
 
 
+input:focus,
 textarea:focus,
 select:focus {
 
     outline: none;
 
-    border-color: #111;
+    border-color: #000;
 
     box-shadow:
         0 0 0 3px rgba(0, 0, 0, 0.07);
-
 }
 
 
-.hint {
-
-    color: #777;
-
-    font-size: 13px;
-
-    margin-top: 6px;
-
-    line-height: 1.4;
-}
-
-
-/* MAIN BUTTON */
+/* BUTTON */
 
 button {
 
-    border: none;
-
-    border-radius: 11px;
-
-    padding: 14px 18px;
-
-    font-size: 15px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-}
-
-
-button:hover {
-
-    transform: translateY(-1px);
-
-}
-
-
-.card > button {
-
     width: 100%;
 
-    margin-top: 25px;
+    margin-top: 22px;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 12px;
 
     background: #000;
 
@@ -195,13 +162,23 @@ button:hover {
 
     font-size: 16px;
 
+    font-weight: bold;
+
+    cursor: pointer;
 }
 
 
-.card > button:hover {
+button:hover {
 
     background: #222;
+}
 
+
+/* HIDDEN */
+
+.hidden {
+
+    display: none;
 }
 
 
@@ -211,75 +188,79 @@ button:hover {
 
     text-align: center;
 
-    color: #555;
-
     margin-top: 15px;
+
+    color: #b00020;
 
     font-size: 14px;
 }
 
 
-/* REPORT PACKAGE */
+/* ACCOUNT PREVIEW */
 
-.report-box {
+.account-preview {
 
-    margin-top: 20px;
+    margin-top: 25px;
 
-    padding: 20px;
+    padding: 15px;
 
-    border: 1px solid #ddd;
+    border-radius: 12px;
 
-    border-radius: 16px;
-
-    background: #fafafa;
+    background: #f3f3f3;
 }
 
 
-.package-header {
+.account-preview span {
 
-    display: flex;
+    display: block;
 
-    justify-content: space-between;
+    color: #777;
 
-    align-items: center;
+    font-size: 13px;
 
-    gap: 10px;
-
-    margin-bottom: 18px;
-
+    margin-bottom: 5px;
 }
 
 
-.package-header h3 {
+.account-preview strong {
 
     font-size: 18px;
 }
 
 
-.package-header span {
+/* REPORT */
 
-    background: #111;
+.report-box {
 
-    color: white;
+    margin-top: 25px;
 
-    padding: 6px 10px;
+    padding: 20px;
 
-    border-radius: 20px;
+    border-radius: 15px;
 
-    font-size: 13px;
+    background: #fafafa;
 
+    border: 1px solid #ddd;
 }
 
 
-.details p {
+.report-box h2 {
 
-    margin-bottom: 10px;
+    margin-bottom: 18px;
+
+    font-size: 20px;
+}
+
+
+.report-box p {
+
+    margin-bottom: 12px;
 
     line-height: 1.5;
 }
 
 
-.details a {
+.report-box a {
 
     color: #0969da;
 
@@ -287,7 +268,7 @@ button:hover {
 }
 
 
-.details ul {
+.report-box ul {
 
     padding-left: 20px;
 
@@ -295,13 +276,11 @@ button:hover {
 }
 
 
-.details li {
+.report-box li {
 
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 
     word-break: break-all;
-
-    line-height: 1.4;
 }
 
 
@@ -313,59 +292,33 @@ button:hover {
 }
 
 
-.empty {
+/* SECONDARY BUTTON */
 
-    color: #888;
-
-    font-style: italic;
-}
-
-
-/* ACTION BUTTONS */
-
-.actions {
-
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 20px;
-}
-
-
-.actions button {
-
-    flex: 1;
-}
-
-
-.download {
-
-    background: #111;
-
-    color: white;
-}
-
-
-.open {
+.secondary {
 
     background: white;
 
-    color: #111;
+    color: black;
 
     border: 1px solid #bbb;
 }
 
 
-.download:hover {
+.secondary:hover {
 
-    background: #333;
+    background: #eee;
 }
 
 
-.open:hover {
+/* ERROR */
 
-    background: #eee;
+.error {
+
+    color: #b00020;
+
+    margin-top: 15px;
+
+    font-size: 14px;
 }
 
 
@@ -420,29 +373,6 @@ button:hover {
     h1 {
 
         font-size: 24px;
-
-    }
-
-
-    .package-header {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-    }
-
-
-    .actions {
-
-        flex-direction: column;
-
-    }
-
-
-    .actions button {
-
-        width: 100%;
 
     }
 
