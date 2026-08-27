@@ -4,123 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>X Report Helper</title>
+    <title>X Report Assistant</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<main class="container">
+<div class="container">
 
-    <section class="card">
+    <div class="card">
 
         <div class="logo">𝕏</div>
 
-        <h1>X Report Helper</h1>
+        <h1>X Report Assistant</h1>
 
         <p class="subtitle">
-            Enter an X username or profile link to begin.
+            Add an X account, relevant evidence, and a short description.
+            The site will suggest the most relevant reporting category.
         </p>
 
-        <!-- ONLY INPUT ON MAIN SCREEN -->
 
-        <label for="account">
-            X username or profile link
+        <label for="reports">
+            Accounts and evidence
         </label>
 
-        <input
-            type="text"
-            id="account"
-            placeholder="@username or https://x.com/username"
-            autocomplete="off"
-        >
+        <textarea
+            id="reports"
+            placeholder="@username | https://x.com/username/status/123 | Describe the genuine violation here
 
-        <button onclick="startReport()">
-            Continue
+@anotheruser | https://x.com/anotheruser/status/456 | Describe what happened here"
+        ></textarea>
+
+        <p class="hint">
+            Use one account per line:
+            <strong>username | evidence link | description</strong>
+        </p>
+
+
+        <button onclick="analyzeReports()">
+            Analyze Reports
         </button>
+
 
         <p id="message"></p>
 
 
-        <!-- STEP 2 -->
-
-        <div id="stepTwo" class="hidden">
-
-            <div class="account-preview">
-
-                <span>Account</span>
-
-                <strong id="accountName"></strong>
-
-            </div>
-
-
-            <label for="reason">
-                Genuine report reason
-            </label>
-
-            <select id="reason">
-
-                <option value="">
-                    Select a reason
-                </option>
-
-                <option>
-                    Harassment or abusive behavior
-                </option>
-
-                <option>
-                    Hateful conduct
-                </option>
-
-                <option>
-                    Spam or platform manipulation
-                </option>
-
-                <option>
-                    Impersonation
-                </option>
-
-                <option>
-                    Violent threats
-                </option>
-
-                <option>
-                    Other violation
-                </option>
-
-            </select>
-
-
-            <label for="evidence">
-                Evidence / post links
-            </label>
-
-            <textarea
-                id="evidence"
-                placeholder="Paste relevant post links, one per line..."
-            ></textarea>
-
-
-            <label for="description">
-                Additional information
-            </label>
-
-            <textarea
-                id="description"
-                placeholder="Briefly describe the genuine violation..."
-            ></textarea>
-
-
-            <button onclick="generatePackage()">
-                Generate Report Package
-            </button>
-
-
-            <div id="package"></div>
-
-        </div>
+        <div id="results"></div>
 
 
         <div class="notice">
@@ -128,28 +58,101 @@
             <strong>Important</strong>
 
             <p>
-                Only provide truthful information about genuine
-                violations. X reviews reports and decides whether
-                enforcement is appropriate.
+                Suggestions are based only on the information you provide.
+                Make sure every report is truthful and supported by evidence.
+                X makes the final decision about enforcement.
             </p>
 
         </div>
 
-    </section>
+    </div>
 
-</main>
+</div>
 
 
 <script>
 
-let currentAccount = "";
+/* =================================
+   REPORT CATEGORIES
+================================= */
+
+const categories = [
+
+    {
+        name: "Violent threats",
+        keywords: [
+            "threat",
+            "threatening",
+            "kill",
+            "murder",
+            "shoot",
+            "attack",
+            "violence",
+            "hurt",
+            "harm"
+        ]
+    },
+
+    {
+        name: "Impersonation",
+        keywords: [
+            "impersonat",
+            "pretending to be",
+            "fake account",
+            "pretend",
+            "posing as",
+            "identity"
+        ]
+    },
+
+    {
+        name: "Hateful conduct",
+        keywords: [
+            "hateful",
+            "hate speech",
+            "slur",
+            "racist",
+            "homophobic",
+            "xenophobic",
+            "dehumaniz"
+        ]
+    },
+
+    {
+        name: "Spam or platform manipulation",
+        keywords: [
+            "spam",
+            "scam",
+            "bot",
+            "automated",
+            "spam messages",
+            "platform manipulation"
+        ]
+    },
+
+    {
+        name: "Harassment or abusive behavior",
+        keywords: [
+            "harass",
+            "abuse",
+            "abusive",
+            "bully",
+            "bullying",
+            "target",
+            "insult",
+            "stalking",
+            "intimidat"
+        ]
+    }
+
+];
 
 
-/* -------------------------
-   VALIDATE ACCOUNT
-------------------------- */
+/* =================================
+   CLEAN USERNAME
+================================= */
 
-function getUsername(value) {
+function cleanUsername(value) {
 
     value = value.trim();
 
@@ -161,7 +164,7 @@ function getUsername(value) {
     value = value.replace(/\s+/g, "");
 
 
-    /* Profile URL */
+    /* X URL */
 
     if (
         value.includes("x.com/") ||
@@ -208,7 +211,7 @@ function getUsername(value) {
     }
 
 
-    /* Username */
+    /* Plain username */
 
     value = value.replace("@", "");
 
@@ -226,262 +229,367 @@ function getUsername(value) {
 }
 
 
-/* -------------------------
-   STEP 1
-------------------------- */
+/* =================================
+   SUGGEST CATEGORY
+================================= */
 
-function startReport() {
+function suggestCategory(description) {
 
-    const input =
-        document.getElementById("account");
-
-    const message =
-        document.getElementById("message");
-
-    const stepTwo =
-        document.getElementById("stepTwo");
+    const text =
+        description.toLowerCase();
 
 
-    const username =
-        getUsername(input.value);
+    let bestCategory =
+        "Other violation";
+
+    let bestScore = 0;
 
 
-    if (!username) {
+    categories.forEach(function(category) {
 
-        message.textContent =
-            "Please enter a valid X username or profile link.";
-
-        return;
-
-    }
+        let score = 0;
 
 
-    currentAccount =
-        username;
+        category.keywords.forEach(function(keyword) {
+
+            if (text.includes(keyword)) {
+
+                score++;
+
+            }
+
+        });
 
 
-    document.getElementById(
-        "accountName"
-    ).textContent =
-        username;
+        if (score > bestScore) {
 
+            bestScore =
+                score;
 
-    message.textContent = "";
+            bestCategory =
+                category.name;
 
+        }
 
-    stepTwo.classList.remove("hidden");
-
-
-    stepTwo.scrollIntoView({
-        behavior: "smooth"
     });
+
+
+    return {
+
+        category: bestCategory,
+
+        confidence:
+            bestScore > 0
+                ? "Based on matching terms in your description."
+                : "No specific category could be confidently matched."
+
+    };
 
 }
 
 
-/* -------------------------
-   GENERATE PACKAGE
-------------------------- */
+/* =================================
+   ANALYZE
+================================= */
 
-function generatePackage() {
+function analyzeReports() {
 
-    const reason =
-        document.getElementById("reason").value;
+    const input =
+        document.getElementById("reports");
 
-    const evidence =
-        document.getElementById("evidence").value
+    const results =
+        document.getElementById("results");
+
+    const message =
+        document.getElementById("message");
+
+
+    results.innerHTML = "";
+    message.textContent = "";
+
+
+    const lines =
+        input.value
             .split("\n")
-            .map(x => x.trim())
+            .map(line => line.trim())
             .filter(Boolean);
 
-    const description =
-        document.getElementById("description").value.trim();
 
-    const output =
-        document.getElementById("package");
+    if (lines.length === 0) {
 
-
-    if (!reason) {
-
-        output.innerHTML =
-            "<p class='error'>Please select a genuine report reason.</p>";
+        message.textContent =
+            "Please enter at least one account.";
 
         return;
 
     }
 
 
+    let validCount = 0;
+
+
+    lines.forEach(function(line, index) {
+
+        const parts =
+            line.split("|");
+
+
+        if (parts.length < 3) {
+
+            addError(
+                "Line " +
+                (index + 1) +
+                " needs: username | evidence link | description"
+            );
+
+            return;
+
+        }
+
+
+        const username =
+            cleanUsername(parts[0]);
+
+
+        const evidence =
+            parts[1].trim();
+
+
+        const description =
+            parts.slice(2)
+                .join("|")
+                .trim();
+
+
+        if (!username) {
+
+            addError(
+                "Line " +
+                (index + 1) +
+                " contains an invalid X username."
+            );
+
+            return;
+
+        }
+
+
+        if (!evidence) {
+
+            addError(
+                username +
+                ": please provide an evidence link."
+            );
+
+            return;
+
+        }
+
+
+        if (!description) {
+
+            addError(
+                username +
+                ": please provide a description."
+            );
+
+            return;
+
+        }
+
+
+        const suggestion =
+            suggestCategory(description);
+
+
+        createResult(
+            username,
+            evidence,
+            description,
+            suggestion
+        );
+
+
+        validCount++;
+
+    });
+
+
+    if (validCount > 0) {
+
+        message.textContent =
+            validCount +
+            " report package(s) analyzed.";
+
+    }
+
+}
+
+
+/* =================================
+   CREATE RESULT
+================================= */
+
+function createResult(
+    username,
+    evidence,
+    description,
+    suggestion
+) {
+
+    const results =
+        document.getElementById("results");
+
+
+    const box =
+        document.createElement("div");
+
+
+    box.className =
+        "report-box";
+
+
     const profile =
         "https://x.com/" +
-        currentAccount.substring(1);
+        username.substring(1);
 
 
-    output.innerHTML = `
+    box.innerHTML = `
 
-        <div class="report-box">
+        <div class="result-header">
 
-            <h2>Report Package</h2>
+            <h2>${escapeHTML(username)}</h2>
 
-            <p>
-                <strong>Account:</strong>
-                ${escapeHTML(currentAccount)}
-            </p>
+            <span>
+                Suggested category
+            </span>
 
-            <p>
-                <strong>Profile:</strong><br>
+        </div>
 
-                <a
-                    href="${profile}"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    ${profile}
-                </a>
-            </p>
+
+        <div class="suggestion">
+
+            <strong>
+                ${escapeHTML(suggestion.category)}
+            </strong>
 
             <p>
-                <strong>Reason:</strong>
-                ${escapeHTML(reason)}
+                ${escapeHTML(suggestion.confidence)}
             </p>
+
+        </div>
+
+
+        <div class="information">
 
             <p>
                 <strong>Evidence:</strong>
             </p>
 
-            ${
-                evidence.length
-                ? "<ul>" +
-                    evidence.map(
-                        x => "<li>" +
-                        escapeHTML(x) +
-                        "</li>"
-                    ).join("") +
-                  "</ul>"
-                : "<p>No evidence links provided.</p>"
-            }
+            <a
+                href="${escapeHTML(evidence)}"
+                target="_blank"
+                rel="noopener"
+            >
+                ${escapeHTML(evidence)}
+            </a>
+
 
             <p>
-                <strong>Additional information:</strong>
+                <strong>Description:</strong>
             </p>
 
             <p class="description">
-                ${
-                    description
-                    ? escapeHTML(description)
-                    : "None provided."
-                }
+                ${escapeHTML(description)}
             </p>
 
+        </div>
+
+
+        <div class="buttons">
 
             <button
-                onclick="downloadPackage()"
+                onclick="openReporting()"
             >
-                Download Package
+                Open X Reporting
             </button>
 
 
             <button
-                class="secondary"
-                onclick="openX()"
+                class="profile-button"
+                onclick="openProfile('${profile}')"
             >
-                Open X Profile
+                View Profile
             </button>
 
         </div>
 
     `;
 
-}
 
-
-/* -------------------------
-   DOWNLOAD
-------------------------- */
-
-function downloadPackage() {
-
-    const reason =
-        document.getElementById("reason").value;
-
-    const evidence =
-        document.getElementById("evidence").value;
-
-    const description =
-        document.getElementById("description").value;
-
-
-    const text =
-
-`X REPORT PACKAGE
-
-Account:
-${currentAccount}
-
-Profile:
-https://x.com/${currentAccount.substring(1)}
-
-Reason:
-${reason}
-
-Evidence:
-${evidence || "None provided."}
-
-Additional information:
-${description || "None provided."}
-
-Prepared for review and submission through X's
-official reporting process.
-`;
-
-
-    const blob =
-        new Blob(
-            [text],
-            { type: "text/plain" }
-        );
-
-
-    const url =
-        URL.createObjectURL(blob);
-
-
-    const link =
-        document.createElement("a");
-
-
-    link.href = url;
-
-    link.download =
-        currentAccount.substring(1) +
-        "-report.txt";
-
-
-    link.click();
-
-
-    URL.revokeObjectURL(url);
+    results.appendChild(box);
 
 }
 
 
-/* -------------------------
-   OPEN X
-------------------------- */
+/* =================================
+   ERROR
+================================= */
 
-function openX() {
+function addError(text) {
+
+    const results =
+        document.getElementById("results");
+
+
+    const error =
+        document.createElement("div");
+
+
+    error.className =
+        "error";
+
+
+    error.textContent =
+        text;
+
+
+    results.appendChild(error);
+
+}
+
+
+/* =================================
+   OPEN X REPORTING
+================================= */
+
+function openReporting() {
 
     window.open(
-        "https://x.com/" +
-        currentAccount.substring(1),
+        "https://help.x.com/en/safety-and-security/report-abusive-behavior",
         "_blank"
     );
 
 }
 
 
-/* -------------------------
+/* =================================
+   OPEN PROFILE
+================================= */
+
+function openProfile(url) {
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+/* =================================
    ESCAPE HTML
-------------------------- */
+================================= */
 
 function escapeHTML(text) {
 
