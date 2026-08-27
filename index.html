@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>X Report Package Builder</title>
+    <title>X Report Helper</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,112 +17,110 @@
 
         <div class="logo">𝕏</div>
 
-        <h1>X Report Package Builder</h1>
+        <h1>X Report Helper</h1>
 
         <p class="subtitle">
-            Organize genuine violation reports and their supporting evidence.
+            Enter an X username or profile link to begin.
         </p>
 
-        <!-- ACCOUNTS -->
+        <!-- ONLY INPUT ON MAIN SCREEN -->
 
-        <label for="accounts">
-            X usernames or profile links
+        <label for="account">
+            X username or profile link
         </label>
 
-        <textarea
-            id="accounts"
-            placeholder="@username1
-@username2
-https://x.com/username3"
-        ></textarea>
+        <input
+            type="text"
+            id="account"
+            placeholder="@username or https://x.com/username"
+            autocomplete="off"
+        >
 
-        <p class="hint">
-            Enter one account per line.
-        </p>
-
-
-        <!-- REASON -->
-
-        <label for="reason">
-            Report reason
-        </label>
-
-        <select id="reason">
-
-            <option value="">
-                Select a genuine reason
-            </option>
-
-            <option>
-                Harassment or abusive behavior
-            </option>
-
-            <option>
-                Hateful conduct
-            </option>
-
-            <option>
-                Spam or platform manipulation
-            </option>
-
-            <option>
-                Impersonation
-            </option>
-
-            <option>
-                Violent threats
-            </option>
-
-            <option>
-                Other violation
-            </option>
-
-        </select>
-
-
-        <!-- EVIDENCE -->
-
-        <label for="evidence">
-            Evidence / post links
-        </label>
-
-        <textarea
-            id="evidence"
-            placeholder="https://x.com/user/status/123456
-https://x.com/user/status/789012
-https://x.com/user/status/345678"
-        ></textarea>
-
-        <p class="hint">
-            Put one relevant post link per line.
-        </p>
-
-
-        <!-- DESCRIPTION -->
-
-        <label for="description">
-            Additional information
-        </label>
-
-        <textarea
-            id="description"
-            placeholder="Briefly explain what happened and why the evidence supports the report."
-        ></textarea>
-
-
-        <!-- GENERATE -->
-
-        <button onclick="generatePackages()">
-            Generate Report Packages
+        <button onclick="startReport()">
+            Continue
         </button>
-
 
         <p id="message"></p>
 
 
-        <!-- RESULTS -->
+        <!-- STEP 2 -->
 
-        <div id="results"></div>
+        <div id="stepTwo" class="hidden">
+
+            <div class="account-preview">
+
+                <span>Account</span>
+
+                <strong id="accountName"></strong>
+
+            </div>
+
+
+            <label for="reason">
+                Genuine report reason
+            </label>
+
+            <select id="reason">
+
+                <option value="">
+                    Select a reason
+                </option>
+
+                <option>
+                    Harassment or abusive behavior
+                </option>
+
+                <option>
+                    Hateful conduct
+                </option>
+
+                <option>
+                    Spam or platform manipulation
+                </option>
+
+                <option>
+                    Impersonation
+                </option>
+
+                <option>
+                    Violent threats
+                </option>
+
+                <option>
+                    Other violation
+                </option>
+
+            </select>
+
+
+            <label for="evidence">
+                Evidence / post links
+            </label>
+
+            <textarea
+                id="evidence"
+                placeholder="Paste relevant post links, one per line..."
+            ></textarea>
+
+
+            <label for="description">
+                Additional information
+            </label>
+
+            <textarea
+                id="description"
+                placeholder="Briefly describe the genuine violation..."
+            ></textarea>
+
+
+            <button onclick="generatePackage()">
+                Generate Report Package
+            </button>
+
+
+            <div id="package"></div>
+
+        </div>
 
 
         <div class="notice">
@@ -130,9 +128,9 @@ https://x.com/user/status/345678"
             <strong>Important</strong>
 
             <p>
-                Only report genuine violations and provide truthful
-                information. X reviews submitted reports and determines
-                whether enforcement is appropriate.
+                Only provide truthful information about genuine
+                violations. X reviews reports and decides whether
+                enforcement is appropriate.
             </p>
 
         </div>
@@ -144,11 +142,14 @@ https://x.com/user/status/345678"
 
 <script>
 
-/* -----------------------------
-   CLEAN USERNAME
------------------------------ */
+let currentAccount = "";
 
-function cleanUsername(value) {
+
+/* -------------------------
+   VALIDATE ACCOUNT
+------------------------- */
+
+function getUsername(value) {
 
     value = value.trim();
 
@@ -156,10 +157,11 @@ function cleanUsername(value) {
         return null;
     }
 
+
     value = value.replace(/\s+/g, "");
 
 
-    /* X profile URL */
+    /* Profile URL */
 
     if (
         value.includes("x.com/") ||
@@ -179,18 +181,21 @@ function cleanUsername(value) {
                     .split("/")
                     .filter(Boolean);
 
-            if (parts.length > 0) {
 
-                const username =
-                    parts[0].replace("@", "");
+            if (parts.length === 0) {
+                return null;
+            }
 
-                if (
-                    /^[A-Za-z0-9_]{1,15}$/.test(username)
-                ) {
 
-                    return "@" + username;
+            const username =
+                parts[0].replace("@", "");
 
-                }
+
+            if (
+                /^[A-Za-z0-9_]{1,15}$/.test(username)
+            ) {
+
+                return "@" + username;
 
             }
 
@@ -203,9 +208,10 @@ function cleanUsername(value) {
     }
 
 
-    /* Plain username */
+    /* Username */
 
     value = value.replace("@", "");
+
 
     if (
         /^[A-Za-z0-9_]{1,15}$/.test(value)
@@ -215,230 +221,122 @@ function cleanUsername(value) {
 
     }
 
+
     return null;
 }
 
 
-/* -----------------------------
-   ESCAPE HTML
------------------------------ */
+/* -------------------------
+   STEP 1
+------------------------- */
 
-function escapeHTML(text) {
+function startReport() {
 
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-/* -----------------------------
-   GENERATE PACKAGES
------------------------------ */
-
-function generatePackages() {
-
-    const accountsText =
-        document.getElementById("accounts").value;
-
-    const reason =
-        document.getElementById("reason").value;
-
-    const evidenceText =
-        document.getElementById("evidence").value;
-
-    const description =
-        document.getElementById("description").value.trim();
+    const input =
+        document.getElementById("account");
 
     const message =
         document.getElementById("message");
 
-    const results =
-        document.getElementById("results");
+    const stepTwo =
+        document.getElementById("stepTwo");
 
 
-    results.innerHTML = "";
+    const username =
+        getUsername(input.value);
+
+
+    if (!username) {
+
+        message.textContent =
+            "Please enter a valid X username or profile link.";
+
+        return;
+
+    }
+
+
+    currentAccount =
+        username;
+
+
+    document.getElementById(
+        "accountName"
+    ).textContent =
+        username;
+
+
     message.textContent = "";
 
 
-    /* Validate accounts */
-
-    if (!accountsText.trim()) {
-
-        message.textContent =
-            "Please enter at least one account.";
-
-        return;
-    }
+    stepTwo.classList.remove("hidden");
 
 
-    /* Validate reason */
-
-    if (!reason) {
-
-        message.textContent =
-            "Please select a report reason.";
-
-        return;
-    }
-
-
-    /* Convert accounts to array */
-
-    const lines =
-        accountsText.split("\n");
-
-    const accounts = [];
-
-    lines.forEach(function(line) {
-
-        const username =
-            cleanUsername(line);
-
-        if (
-            username &&
-            !accounts.includes(username)
-        ) {
-
-            accounts.push(username);
-
-        }
-
-    });
-
-
-    if (accounts.length === 0) {
-
-        message.textContent =
-            "No valid X usernames were found.";
-
-        return;
-    }
-
-
-    /* Evidence */
-
-    const evidence =
-        evidenceText
-            .split("\n")
-            .map(link => link.trim())
-            .filter(link => link !== "");
-
-
-    message.textContent =
-        accounts.length +
-        " individual report package(s) created.";
-
-
-    /* Create each package */
-
-    accounts.forEach(function(username, index) {
-
-        createPackage(
-            username,
-            reason,
-            evidence,
-            description,
-            index
-        );
-
+    stepTwo.scrollIntoView({
+        behavior: "smooth"
     });
 
 }
 
 
-/* -----------------------------
-   CREATE PACKAGE
------------------------------ */
+/* -------------------------
+   GENERATE PACKAGE
+------------------------- */
 
-function createPackage(
-    username,
-    reason,
-    evidence,
-    description,
-    index
-) {
+function generatePackage() {
 
-    const results =
-        document.getElementById("results");
+    const reason =
+        document.getElementById("reason").value;
 
+    const evidence =
+        document.getElementById("evidence").value
+            .split("\n")
+            .map(x => x.trim())
+            .filter(Boolean);
 
-    const box =
-        document.createElement("div");
+    const description =
+        document.getElementById("description").value.trim();
 
-    box.className =
-        "report-box";
-
-
-    const profileUrl =
-        "https://x.com/" +
-        username.substring(1);
+    const output =
+        document.getElementById("package");
 
 
-    let evidenceHTML = "";
+    if (!reason) {
 
+        output.innerHTML =
+            "<p class='error'>Please select a genuine report reason.</p>";
 
-    if (evidence.length > 0) {
-
-        evidenceHTML =
-            "<ul>";
-
-        evidence.forEach(function(link) {
-
-            evidenceHTML +=
-                "<li>" +
-                escapeHTML(link) +
-                "</li>";
-
-        });
-
-        evidenceHTML +=
-            "</ul>";
-
-    } else {
-
-        evidenceHTML =
-            "<p class='empty'>No evidence links provided.</p>";
+        return;
 
     }
 
 
-    box.innerHTML = `
-
-        <div class="package-header">
-
-            <h3>
-                Report Package ${index + 1}
-            </h3>
-
-            <span>
-                ${escapeHTML(username)}
-            </span>
-
-        </div>
+    const profile =
+        "https://x.com/" +
+        currentAccount.substring(1);
 
 
-        <div class="details">
+    output.innerHTML = `
+
+        <div class="report-box">
+
+            <h2>Report Package</h2>
 
             <p>
                 <strong>Account:</strong>
-                ${escapeHTML(username)}
+                ${escapeHTML(currentAccount)}
             </p>
 
             <p>
                 <strong>Profile:</strong><br>
 
                 <a
-                    href="${profileUrl}"
+                    href="${profile}"
                     target="_blank"
                     rel="noopener"
                 >
-                    ${profileUrl}
+                    ${profile}
                 </a>
-
             </p>
 
             <p>
@@ -446,49 +344,45 @@ function createPackage(
                 ${escapeHTML(reason)}
             </p>
 
-
             <p>
                 <strong>Evidence:</strong>
             </p>
 
-            ${evidenceHTML}
-
+            ${
+                evidence.length
+                ? "<ul>" +
+                    evidence.map(
+                        x => "<li>" +
+                        escapeHTML(x) +
+                        "</li>"
+                    ).join("") +
+                  "</ul>"
+                : "<p>No evidence links provided.</p>"
+            }
 
             <p>
                 <strong>Additional information:</strong>
             </p>
 
             <p class="description">
-
                 ${
                     description
-                        ? escapeHTML(description)
-                        : "No additional information provided."
+                    ? escapeHTML(description)
+                    : "None provided."
                 }
-
             </p>
 
-        </div>
-
-
-        <div class="actions">
 
             <button
-                class="download"
-                onclick="downloadPackage(
-                    '${escapeJS(username)}',
-                    '${escapeJS(reason)}',
-                    ${JSON.stringify(evidence)},
-                    '${escapeJS(description)}'
-                )"
+                onclick="downloadPackage()"
             >
                 Download Package
             </button>
 
 
             <button
-                class="open"
-                onclick="openXProfile('${escapeJS(profileUrl)}')"
+                class="secondary"
+                onclick="openX()"
             >
                 Open X Profile
             </button>
@@ -497,81 +391,53 @@ function createPackage(
 
     `;
 
-
-    results.appendChild(box);
-
 }
 
 
-/* -----------------------------
-   DOWNLOAD REPORT
------------------------------ */
+/* -------------------------
+   DOWNLOAD
+------------------------- */
 
-function downloadPackage(
-    username,
-    reason,
-    evidence,
-    description
-) {
+function downloadPackage() {
 
-    let text = "";
+    const reason =
+        document.getElementById("reason").value;
 
-    text += "X REPORT PACKAGE\n";
-    text += "========================\n\n";
+    const evidence =
+        document.getElementById("evidence").value;
 
-    text += "ACCOUNT\n";
-    text += username + "\n\n";
-
-    text += "PROFILE\n";
-    text += "https://x.com/" +
-            username.substring(1) +
-            "\n\n";
-
-    text += "REASON\n";
-    text += reason + "\n\n";
-
-    text += "EVIDENCE\n";
-
-    if (evidence.length > 0) {
-
-        evidence.forEach(function(link, index) {
-
-            text +=
-                (index + 1) +
-                ". " +
-                link +
-                "\n";
-
-        });
-
-    } else {
-
-        text +=
-            "No evidence links provided.\n";
-
-    }
+    const description =
+        document.getElementById("description").value;
 
 
-    text += "\nADDITIONAL INFORMATION\n";
+    const text =
 
-    text +=
-        description ||
-        "No additional information provided.";
+`X REPORT PACKAGE
 
+Account:
+${currentAccount}
 
-    text +=
-        "\n\n------------------------\n";
+Profile:
+https://x.com/${currentAccount.substring(1)}
 
-    text +=
-        "Prepared for review and submission through X's official reporting process.\n";
+Reason:
+${reason}
+
+Evidence:
+${evidence || "None provided."}
+
+Additional information:
+${description || "None provided."}
+
+Prepared for review and submission through X's
+official reporting process.
+`;
 
 
     const blob =
         new Blob(
             [text],
-            {
-                type: "text/plain"
-            }
+            { type: "text/plain" }
         );
 
 
@@ -585,17 +451,12 @@ function downloadPackage(
 
     link.href = url;
 
-
     link.download =
-        username.substring(1) +
-        "-report-package.txt";
+        currentAccount.substring(1) +
+        "-report.txt";
 
-
-    document.body.appendChild(link);
 
     link.click();
-
-    document.body.removeChild(link);
 
 
     URL.revokeObjectURL(url);
@@ -603,32 +464,33 @@ function downloadPackage(
 }
 
 
-/* -----------------------------
-   OPEN X PROFILE
------------------------------ */
+/* -------------------------
+   OPEN X
+------------------------- */
 
-function openXProfile(url) {
+function openX() {
 
     window.open(
-        url,
-        "_blank",
-        "noopener"
+        "https://x.com/" +
+        currentAccount.substring(1),
+        "_blank"
     );
 
 }
 
 
-/* -----------------------------
-   ESCAPE JAVASCRIPT STRINGS
------------------------------ */
+/* -------------------------
+   ESCAPE HTML
+------------------------- */
 
-function escapeJS(text) {
+function escapeHTML(text) {
 
-    return String(text)
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "\\r");
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
